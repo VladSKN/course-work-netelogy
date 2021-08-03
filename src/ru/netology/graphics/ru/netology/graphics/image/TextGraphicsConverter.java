@@ -6,7 +6,6 @@ import ru.netology.graphics.image.TextColorSchema;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
@@ -19,22 +18,9 @@ public class TextGraphicsConverter implements ru.netology.graphics.image.TextGra
     @Override
     public String convert(String url) throws IOException, BadImageSizeException {
         BufferedImage img = ImageIO.read(new URL(url));
-
-        double ratio;
-
-        if (img.getWidth() > img.getHeight()) {
-            ratio = (double) img.getWidth() / (double) img.getHeight();
-        } else {
-            ratio = (double) img.getHeight() / (double) img.getWidth();
-        }
-
-        if (Math.abs(ratio) > Math.abs(getMaxRatio())) {
-            throw new BadImageSizeException(getMaxRatio(), ratio);
-        }
-
+        maximumRatio(img);
         int newWidth = img.getWidth();
         int newHeight = img.getHeight();
-
         if (img.getWidth() > getMaxWidth()) {
             newWidth = getMaxWidth();
             newHeight = (newWidth * img.getHeight()) / img.getWidth();
@@ -44,7 +30,6 @@ public class TextGraphicsConverter implements ru.netology.graphics.image.TextGra
             newHeight = getMaxHeight();
             newWidth = (newHeight * img.getWidth()) / img.getHeight();
         }
-
         Image scaledImage = img.getScaledInstance(newWidth, newHeight, BufferedImage.SCALE_SMOOTH);
         BufferedImage bwImg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_BYTE_GRAY);
         Graphics2D graphics = bwImg.createGraphics();
@@ -60,14 +45,8 @@ public class TextGraphicsConverter implements ru.netology.graphics.image.TextGra
                 mas[h][w] = c;
             }
         }
-
         StringBuilder sb = new StringBuilder();
-        for (char[] ma : mas) {
-            for (char c : ma) {
-                sb.append(c).append(" ");
-            }
-            sb.append("\n");
-        }
+        printText(mas, sb);
         return sb.toString();
     }
 
@@ -100,5 +79,27 @@ public class TextGraphicsConverter implements ru.netology.graphics.image.TextGra
 
     public double getMaxRatio() {
         return maxRatio;
+    }
+
+    public void maximumRatio(BufferedImage img) throws BadImageSizeException {
+        double ratio;
+        if (img.getWidth() > img.getHeight()) {
+            ratio = img.getWidth() / (double) img.getHeight();
+        } else {
+            ratio = img.getHeight() / (double) img.getWidth();
+        }
+
+        if (Math.abs(ratio) > Math.abs(getMaxRatio())) {
+            throw new BadImageSizeException(getMaxRatio(), ratio);
+        }
+    }
+
+    public void printText(char[][] mas, StringBuilder sb) {
+        for (char[] ma : mas) {
+            for (char c : ma) {
+                sb.append(c).append(" ");
+            }
+            sb.append("\n");
+        }
     }
 }
